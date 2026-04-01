@@ -1,0 +1,20 @@
+name: DockTamer
+options:
+  bundleIdPrefix: com.docktamer
+targets:
+  DockTamer:
+    type: application
+    platform: macOS
+    deploymentTarget: "13.0"
+    sources: 
+      - DockTamer/Sources
+      - DockTamer/Assets.xcassets
+    settings:
+      GENERATE_INFOPLIST_FILE: YES
+      ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+      INFOPLIST_KEY_LSUIElement: YES
+      INFOPLIST_KEY_NSAccessibilityUsageDescription: "DockTamer requiere acceder a los eventos del ratón para modificar el comportamiento ocultando/restaurando ventanas dinámicamente desde el Dock."
+      # Standard properties for macOS apps that Xcode implicitly adds
+      INFOPLIST_KEY_CFBundleShortVersionString: "1.0"
+      INFOPLIST_KEY_CFBundleVersion: "1"
+      INFOPLIST_KEY_NSPrincipalClass: "NSApplication"
