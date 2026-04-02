@@ -19,3 +19,4 @@ DerivedData
 
 # xcodegen generated file
 DockTamer.xcodeproj/
+*.dmg
