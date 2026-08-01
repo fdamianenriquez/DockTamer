@@ -48,3 +48,7 @@ Alternatively, you can run the pre-packaged application found in `DockTamer.dmg`
 ## License & Privacy
 
 DockTamer processes all events locally on your machine. It does not phone home, track your clicks outside of the Dock, or log your application usage. 
+
+## Demo
+
+![DockTamer demo](./docs/demo.gif)
