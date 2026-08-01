@@ -1,6 +1,10 @@
 # DockTamer
-
-DockTamer is a sleek and lightweight macOS utility that modifies the native Dock's behavior to provide **"Click-to-Minimize"** functionality, reminiscent of the behavior found in Windows and GNOME desktop environments. 
+ 
+![Platform](https://img.shields.io/badge/platform-macOS%2013%2B-blue?style=flat-square&logo=apple&logoColor=white)
+![Swift](https://img.shields.io/badge/-Swift-F05138?style=flat-square&logo=swift&logoColor=white)
+![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)
+ 
+DockTamer is a sleek and lightweight macOS utility that modifies the native Dock's behavior to provide **"Click-to-Minimize"** functionality, reminiscent of the behavior found in Windows and GNOME desktop environments.
 
 ## Features
 
