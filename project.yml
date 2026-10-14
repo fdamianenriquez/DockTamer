@@ -17,6 +17,6 @@ targets:
       INFOPLIST_KEY_LSUIElement: YES
       INFOPLIST_KEY_NSAccessibilityUsageDescription: "DockTamer needs access to mouse events to minimize and restore windows from the Dock."
       # Standard properties for macOS apps that Xcode implicitly adds
-      INFOPLIST_KEY_CFBundleShortVersionString: "1.0"
-      INFOPLIST_KEY_CFBundleVersion: "1"
+      INFOPLIST_KEY_CFBundleShortVersionString: "1.1"
+      INFOPLIST_KEY_CFBundleVersion: "2"
       INFOPLIST_KEY_NSPrincipalClass: "NSApplication"
