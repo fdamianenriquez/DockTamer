@@ -44,7 +44,7 @@ class DockClickMonitor {
         )
         
         guard let eventTap = eventTap else {
-            print("❌ No se pudo crear el EventTap. ¿Permisos de Accesibilidad denegados?")
+            print("❌ Could not create the EventTap. Accessibility permissions denied?")
             return
         }
         

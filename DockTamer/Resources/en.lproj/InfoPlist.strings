@@ -1,0 +1,2 @@
+/* Accessibility permission prompt */
+"NSAccessibilityUsageDescription" = "DockTamer needs access to mouse events to minimize and restore windows from the Dock.";

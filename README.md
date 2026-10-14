@@ -12,6 +12,7 @@ DockTamer is a sleek and lightweight macOS utility that modifies the native Dock
 - **Smart Restoration:** If an application is activated and all of its windows are currently minimized, DockTamer will automatically un-minimize and restore them for you.
 - **Menu Bar App:** Runs completely in the background without cluttering your Dock. It features a custom-designed, dynamically generated menu bar icon that natively blends in with macOS.
 - **Easy Toggle:** Quickly enable or disable the Click-to-Minimize functionality directly from the menu bar drop-down.
+- **Localized:** Available in English and Spanish. It automatically follows the macOS system language (or the per-app language set in System Settings → General → Language & Region → Applications), falling back to English.
 - **Seamless Permission Handling:** Automatically requests the necessary Accessibility permissions and detects when they are granted in real-time, removing the need to restart the app.
 
 ## Requirements

@@ -26,14 +26,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu = NSMenu()
         
-        toggleItem = NSMenuItem(title: "Deshabilitar Click-to-Minimize", action: #selector(toggleFeature), keyEquivalent: "")
+        toggleItem = NSMenuItem(title: NSLocalizedString("Disable Click-to-Minimize", comment: "Menu item to turn the feature off"), action: #selector(toggleFeature), keyEquivalent: "")
         menu.addItem(toggleItem)
         
-        permissionItem = NSMenuItem(title: "Estado de permisos: Evaluando...", action: #selector(requestPermissionsManual), keyEquivalent: "")
+        permissionItem = NSMenuItem(title: NSLocalizedString("Permission status: Checking...", comment: "Menu item shown while checking permissions"), action: #selector(requestPermissionsManual), keyEquivalent: "")
         menu.addItem(permissionItem)
         
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Salir", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: NSLocalizedString("Quit", comment: "Menu item to quit the app"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         
         // El retraso al asignar el menú evita el warning de "_NSDetectedLayoutRecursion" 
         // común en macOS 13+ al inicializar un NSStatusItem.
@@ -44,7 +44,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     @objc func toggleFeature() {
         DockClickMonitor.shared.isEnabled.toggle()
-        toggleItem.title = DockClickMonitor.shared.isEnabled ? "Deshabilitar Click-to-Minimize" : "Habilitar Click-to-Minimize"
+        toggleItem.title = DockClickMonitor.shared.isEnabled
+            ? NSLocalizedString("Disable Click-to-Minimize", comment: "Menu item to turn the feature off")
+            : NSLocalizedString("Enable Click-to-Minimize", comment: "Menu item to turn the feature on")
     }
     
     func checkAndRequestAccessibilityPermissions() {
@@ -75,7 +77,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func updatePermissionUI(granted: Bool) {
-        permissionItem.title = "Permisos de Accesibilidad: \(granted ? "✅ Concedido" : "❌ Denegado")"
+        let status = granted
+            ? NSLocalizedString("✅ Granted", comment: "Accessibility permission status")
+            : NSLocalizedString("❌ Denied", comment: "Accessibility permission status")
+        permissionItem.title = String(format: NSLocalizedString("Accessibility Permissions: %@", comment: "Menu item showing permission status"), status)
         // Si está concedido ya no necesitamos darle clic
         permissionItem.action = granted ? nil : #selector(requestPermissionsManual)
     }
@@ -89,11 +94,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func showPermissionAlert() {
         let alert = NSAlert()
-        alert.messageText = "Permisos Requeridos"
-        alert.informativeText = "DockTamer necesita permisos de Accesibilidad para detectar tus clics en el Dock y minimizar las ventanas.\n\nPor favor, actívalos en Ajustes del Sistema."
+        alert.messageText = NSLocalizedString("Permissions Required", comment: "Permission alert title")
+        alert.informativeText = NSLocalizedString("DockTamer needs Accessibility permissions to detect your clicks on the Dock and minimize windows.\n\nPlease enable them in System Settings.", comment: "Permission alert body")
         alert.alertStyle = .warning
-        alert.addButton(withTitle: "Abrir Ajustes")
-        alert.addButton(withTitle: "Más tarde")
+        alert.addButton(withTitle: NSLocalizedString("Open Settings", comment: "Permission alert button"))
+        alert.addButton(withTitle: NSLocalizedString("Later", comment: "Permission alert button"))
         
         // Elevar la alerta a primer plano para que el usuario la vea, al no tener ventana normal
         NSApp.activate(ignoringOtherApps: true)

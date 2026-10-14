@@ -1,0 +1,2 @@
+/* Accessibility permission prompt */
+"NSAccessibilityUsageDescription" = "DockTamer requiere acceder a los eventos del ratón para modificar el comportamiento ocultando/restaurando ventanas dinámicamente desde el Dock.";
