@@ -37,6 +37,10 @@ The application is built entirely in Swift and uses modern macOS APIs:
 
 ## Installation / Setup
 
+Download `DockTamer.dmg` from the [latest release](https://github.com/fdamianenriquez/DockTamer/releases/latest) (also available in the repository root), open it and drag **DockTamer** into **Applications**. It runs natively on both Apple Silicon and Intel Macs.
+
+> **Note:** DockTamer is not notarized by Apple yet, so macOS will block it the first time. Right-click the app and choose **Open**, or allow it from **System Settings → Privacy & Security**.
+
 If you want to build the project from source:
 
 1. Clone the repository.
@@ -44,7 +48,7 @@ If you want to build the project from source:
 3. Run `xcodegen` in the repository root to generate the `DockTamer.xcodeproj`.
 4. Open the generated project in Xcode and build/run.
 
-Alternatively, you can run the pre-packaged application found in `DockTamer.dmg`.
+To build the distributable DMG without Xcode (only the Command Line Tools are needed), run `scripts/build-dmg.sh`. It produces a universal (arm64 + x86_64), ad-hoc signed `DockTamer.dmg` using the version from `project.yml`.
 
 ## License & Privacy
 
