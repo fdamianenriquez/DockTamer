@@ -11,7 +11,7 @@ class DockClickMonitor {
     private var eventTap: CFMachPort?
     private var runLoopSource: CFRunLoopSource?
     
-    // Cache del objeto global de Accesibilidad
+    // Cached system-wide Accessibility element
     private let systemWideElement = AXUIElementCreateSystemWide()
     
     // Short timeout for AX queries inside the tap callback. If the app under the cursor
@@ -20,7 +20,7 @@ class DockClickMonitor {
     static let hitTestTimeout: Float = 0.1
     static let axTimeout: Float = 1.0
     
-    // Evita la inicialización desde fuera
+    // Prevent instantiation from outside
     private init() {
         AXUIElementSetMessagingTimeout(systemWideElement, DockClickMonitor.hitTestTimeout)
     }
@@ -28,7 +28,7 @@ class DockClickMonitor {
     func start() {
         guard eventTap == nil else { return }
         
-        // Nos interesan únicamente los clics de ratón (botón izquierdo hacia abajo)
+        // We only care about mouse clicks (left button down)
         let eventMask = (1 << CGEventType.leftMouseDown.rawValue)
         
         eventTap = CGEvent.tapCreate(
@@ -48,7 +48,7 @@ class DockClickMonitor {
             return
         }
         
-        // Añadir el monitor de clics al hilo principal usando .commonModes (previene lag del sistema)
+        // Add the click monitor to the main run loop using .commonModes (prevents system lag)
         runLoopSource = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, eventTap, 0)
         CFRunLoopAddSource(CFRunLoopGetCurrent(), runLoopSource, .commonModes)
         CGEvent.tapEnable(tap: eventTap, enable: true)
@@ -76,13 +76,13 @@ class DockClickMonitor {
             return Unmanaged.passUnretained(event)
         }
         
-        // 1. Salida rápida: ¿Es un evento de nuestro interés?
+        // 1. Fast exit: is this an event we care about?
         guard isEnabled && type == .leftMouseDown else {
             return Unmanaged.passUnretained(event)
         }
         
-        // 2. SUPER OPTIMIZACIÓN: Solo nos interesa alterar la app que ya está ACTIVA (en primer plano).
-        // Si no hay app en primer plano, dejamos pasar el evento inmediatamente (coste CPU 0%).
+        // 2. KEY OPTIMIZATION: we only act on the app that is already ACTIVE (frontmost).
+        // If there is no frontmost app, pass the event through immediately (0% CPU cost).
         guard let frontmostApp = NSWorkspace.shared.frontmostApplication else {
             return Unmanaged.passUnretained(event)
         }
@@ -90,7 +90,7 @@ class DockClickMonitor {
         let mouseLocation = event.location
         var elementUnderMouse: AXUIElement?
         
-        // 3. Consultamos el caché del sistema para ver qué hay en las coordenadas del ratón
+        // 3. Ask the system what is at the mouse coordinates
         let start = DispatchTime.now()
         let error = AXUIElementCopyElementAtPosition(systemWideElement, Float(mouseLocation.x), Float(mouseLocation.y), &elementUnderMouse)
         let elapsedMs = Double(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds) / 1_000_000
@@ -105,13 +105,13 @@ class DockClickMonitor {
         var pid: pid_t = 0
         AXUIElementGetPid(element, &pid)
         
-        // 4. Descartar rápido si no es el Dock de macOS
+        // 4. Bail out quickly if it isn't the macOS Dock
         guard let clickedApp = NSRunningApplication(processIdentifier: pid),
               clickedApp.bundleIdentifier == "com.apple.dock" else {
             return Unmanaged.passUnretained(event)
         }
         
-        // 5. Verificar que sea un icono de App
+        // 5. Make sure it's an app icon
         var roleRef: CFTypeRef?
         AXUIElementCopyAttributeValue(element, kAXRoleAttribute as CFString, &roleRef)
         
@@ -119,8 +119,8 @@ class DockClickMonitor {
             var titleRef: CFTypeRef?
             AXUIElementCopyAttributeValue(element, kAXTitleAttribute as CFString, &titleRef)
             
-            // 6. OPTIMIZACIÓN CLAVE O(1): Comparamos el nombre del ítem del Dock directamente con la app en primer plano.
-            // Para ser más robustos (ej. iTerm vs iTerm2), verificamos también el nombre del propio archivo .app.
+            // 6. O(1) KEY OPTIMIZATION: compare the Dock item's name directly against the frontmost app.
+            // To be more robust (e.g. iTerm vs iTerm2), also check the name of the .app bundle itself.
             let appName = frontmostApp.localizedName ?? ""
             let bundleName = frontmostApp.bundleURL?.deletingPathExtension().lastPathComponent ?? ""
             
@@ -172,7 +172,7 @@ class DockClickMonitor {
                     }
                 }
                 
-                return nil // Traga el evento original
+                return nil // Swallow the original event
             }
         }
         

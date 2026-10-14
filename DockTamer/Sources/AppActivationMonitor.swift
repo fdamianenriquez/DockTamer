@@ -17,14 +17,14 @@ class AppActivationMonitor {
             queue: .main
         ) { notification in
             
-            // Verificamos si la función global de DockTamer está encendida
+            // Check whether DockTamer's global feature is enabled
             guard DockClickMonitor.shared.isEnabled else { return }
             
             guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication else {
                 return
             }
             
-            // Excluimos nuestra propia app o las del sistema background
+            // Skip our own app and background system apps
             guard app.activationPolicy == .regular else { return }
             
             // Off the main thread: apps that are slow to answer AX (e.g. System Settings) would
@@ -63,7 +63,7 @@ class AppActivationMonitor {
                 }
             }
             
-            // Si tiene ventanas y todas están minimizadas, las restauramos
+            // If it has windows and all of them are minimized, restore them
             if allMinimized {
                 for window in windows {
                     AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, kCFBooleanFalse)

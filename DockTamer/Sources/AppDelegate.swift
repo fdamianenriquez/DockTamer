@@ -7,7 +7,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var toggleItem: NSMenuItem!
     var permissionItem: NSMenuItem!
     
-    // Timer para verificar si el usuario aprobó en Preferencias del Sistema
+    // Timer to check whether the user granted access in System Settings
     var permissionTimer: Timer?
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
@@ -16,11 +16,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func setupMenuBar() {
-        // VariableLength para que se adapte al ícono
+        // VariableLength so it fits the icon
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         
         if let button = statusItem.button {
-            // Estilo Apple nativo pero con gráficos detallados generados dinámicamente
+            // Native Apple style, with detailed dynamically generated graphics
             button.image = NSImage.macDockMenuBarIcon
         }
 
@@ -35,8 +35,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: NSLocalizedString("Quit", comment: "Menu item to quit the app"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q"))
         
-        // El retraso al asignar el menú evita el warning de "_NSDetectedLayoutRecursion" 
-        // común en macOS 13+ al inicializar un NSStatusItem.
+        // Deferring the menu assignment avoids the "_NSDetectedLayoutRecursion" warning
+        // that is common on macOS 13+ when initializing an NSStatusItem.
         DispatchQueue.main.async {
             self.statusItem.menu = self.menu
         }
@@ -50,7 +50,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func checkAndRequestAccessibilityPermissions() {
-        // La opción Prompt lanza la alerta nativa del sistema si el permiso no está otorgado
+        // The Prompt option shows the native system alert if permission hasn't been granted
         let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
         let isTrusted = AXIsProcessTrustedWithOptions(options)
         
@@ -62,7 +62,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         } else {
             showPermissionAlert()
             
-            // Iniciar un timer (polling) para arrancar la app automáticamente en cuanto el usuario otorgue el permiso de Privacidad
+            // Start a polling timer to start the monitors automatically as soon as the user grants the Privacy permission
             permissionTimer = Timer.scheduledTimer(withTimeInterval: 1.5, repeats: true) { [weak self] timer in
                 let granted = AXIsProcessTrusted()
                 self?.updatePermissionUI(granted: granted)
@@ -81,12 +81,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             ? NSLocalizedString("✅ Granted", comment: "Accessibility permission status")
             : NSLocalizedString("❌ Denied", comment: "Accessibility permission status")
         permissionItem.title = String(format: NSLocalizedString("Accessibility Permissions: %@", comment: "Menu item showing permission status"), status)
-        // Si está concedido ya no necesitamos darle clic
+        // Once granted, the item no longer needs to be clickable
         permissionItem.action = granted ? nil : #selector(requestPermissionsManual)
     }
     
     @objc func requestPermissionsManual() {
-        // URL universal en macOS modernos para abrir Privacidad > Accesibilidad
+        // Universal URL on modern macOS to open Privacy > Accessibility
         if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") {
             NSWorkspace.shared.open(url)
         }
@@ -100,7 +100,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         alert.addButton(withTitle: NSLocalizedString("Open Settings", comment: "Permission alert button"))
         alert.addButton(withTitle: NSLocalizedString("Later", comment: "Permission alert button"))
         
-        // Elevar la alerta a primer plano para que el usuario la vea, al no tener ventana normal
+        // Bring the alert to the front so the user sees it, since the app has no regular window
         NSApp.activate(ignoringOtherApps: true)
         
         if alert.runModal() == .alertFirstButtonReturn {
@@ -110,46 +110,46 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 }
 
 extension NSImage {
-    /// Genera dinámicamente un detallado icono de la barra de menú simulando el diseño de utilidad de Apple
+    /// Dynamically generates a detailed menu bar icon in the style of Apple's utilities
     static var macDockMenuBarIcon: NSImage {
         let size = NSSize(width: 18, height: 18)
         let image = NSImage(size: size, flipped: false) { rect in
             NSColor.black.set()
             
-            // 1. Dibujar el marco exterior de la ventana (Rectángulo con esquinas redondeadas)
+            // 1. Draw the window's outer frame (rounded rectangle)
             let windowRect = NSRect(x: 3, y: 6.5, width: 12, height: 7.5)
             let windowPath = NSBezierPath(roundedRect: windowRect, xRadius: 1.5, yRadius: 1.5)
             windowPath.lineWidth = 1.2
             windowPath.stroke()
             
-            // 2. Dibujar la barra de título pequeña de la ventana
+            // 2. Draw the window's small title bar
             let titleBarLine = NSBezierPath()
             titleBarLine.move(to: NSPoint(x: 3, y: 11.5))
             titleBarLine.line(to: NSPoint(x: 15, y: 11.5))
             titleBarLine.lineWidth = 1.0
             titleBarLine.stroke()
             
-            // 3. Dibujar "botón" en la barra de título (simulando los traffic lights de macOS)
+            // 3. Draw a "button" in the title bar (mimicking the macOS traffic lights)
             let dotRect = NSRect(x: 4.5, y: 12.2, width: 1.0, height: 1.0)
             let dotPath = NSBezierPath(ovalIn: dotRect)
             dotPath.fill()
             
-            // 4. Dibujar el Dock (rectángulo grueso en la base)
+            // 4. Draw the Dock (thick rectangle at the bottom)
             let dockRect = NSRect(x: 4, y: 2.5, width: 10, height: 2.0)
             let dockPath = NSBezierPath(roundedRect: dockRect, xRadius: 1, yRadius: 1)
             dockPath.fill()
             
-            // 5. Dibujar una flecha central empujando hacia el dock
+            // 5. Draw a central arrow pointing down into the Dock
             let arrowPath = NSBezierPath()
             arrowPath.lineWidth = 1.2
             arrowPath.lineCapStyle = .round
             arrowPath.lineJoinStyle = .round
             
-            // Tronco de la flecha cruzando desde el centro al dock
+            // Arrow shaft from the center down to the Dock
             arrowPath.move(to: NSPoint(x: 9, y: 9.5))
             arrowPath.line(to: NSPoint(x: 9, y: 5))
             
-            // Punta inferior de la flecha
+            // Arrow head
             arrowPath.move(to: NSPoint(x: 7.0, y: 6.8))
             arrowPath.line(to: NSPoint(x: 9, y: 5))
             arrowPath.line(to: NSPoint(x: 11.0, y: 6.8))
