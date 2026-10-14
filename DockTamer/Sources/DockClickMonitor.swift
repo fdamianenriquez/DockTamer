@@ -1,5 +1,8 @@
 import Cocoa
 import ApplicationServices
+import os
+
+private let logger = Logger(subsystem: "com.docktamer.DockTamer", category: "DockClickMonitor")
 
 class DockClickMonitor {
     static let shared = DockClickMonitor()
@@ -11,8 +14,16 @@ class DockClickMonitor {
     // Cache del objeto global de Accesibilidad
     private let systemWideElement = AXUIElementCreateSystemWide()
     
+    // Short timeout for AX queries inside the tap callback. If the app under the cursor
+    // (e.g. System Settings) is slow to respond, the default timeout (~6s) stalls the tap and macOS
+    // disables it with `tapDisabledByTimeout`.
+    static let hitTestTimeout: Float = 0.1
+    static let axTimeout: Float = 1.0
+    
     // Evita la inicialización desde fuera
-    private init() {}
+    private init() {
+        AXUIElementSetMessagingTimeout(systemWideElement, DockClickMonitor.hitTestTimeout)
+    }
     
     func start() {
         guard eventTap == nil else { return }
@@ -55,6 +66,16 @@ class DockClickMonitor {
     }
     
     private func handleEvent(proxy: CGEventTapProxy, type: CGEventType, event: CGEvent) -> Unmanaged<CGEvent>? {
+        // 0. macOS disables the tap if the callback takes too long or due to user input.
+        // Without re-enabling it, DockTamer stops working until restarted.
+        if type == .tapDisabledByTimeout || type == .tapDisabledByUserInput {
+            logger.notice("Event tap disabled by the system (type=\(type.rawValue)), re-enabling")
+            if let eventTap = eventTap {
+                CGEvent.tapEnable(tap: eventTap, enable: true)
+            }
+            return Unmanaged.passUnretained(event)
+        }
+        
         // 1. Salida rápida: ¿Es un evento de nuestro interés?
         guard isEnabled && type == .leftMouseDown else {
             return Unmanaged.passUnretained(event)
@@ -70,7 +91,12 @@ class DockClickMonitor {
         var elementUnderMouse: AXUIElement?
         
         // 3. Consultamos el caché del sistema para ver qué hay en las coordenadas del ratón
+        let start = DispatchTime.now()
         let error = AXUIElementCopyElementAtPosition(systemWideElement, Float(mouseLocation.x), Float(mouseLocation.y), &elementUnderMouse)
+        let elapsedMs = Double(DispatchTime.now().uptimeNanoseconds - start.uptimeNanoseconds) / 1_000_000
+        if elapsedMs > 50 {
+            logger.notice("Slow AX hit-test: \(elapsedMs, format: .fixed(precision: 1)) ms (error=\(error.rawValue))")
+        }
         
         guard error == .success, let element = elementUnderMouse else {
             return Unmanaged.passUnretained(event)
@@ -100,8 +126,10 @@ class DockClickMonitor {
             
             if let targetAppName = titleRef as? String, (targetAppName == appName || targetAppName == bundleName) {
                 
-                DispatchQueue.main.async {
+                // Off the main thread so we don't block the run loop the tap lives on.
+                DispatchQueue.global(qos: .userInteractive).async {
                     let appElement = AXUIElementCreateApplication(frontmostApp.processIdentifier)
+                    AXUIElementSetMessagingTimeout(appElement, DockClickMonitor.axTimeout)
                     var windowsRef: CFTypeRef?
                     
                     if AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef) == .success,
@@ -119,15 +147,28 @@ class DockClickMonitor {
                         
                         let toggleValue = (allMinimized ? kCFBooleanFalse : kCFBooleanTrue)!
                         
+                        var anyChanged = false
                         for window in windows {
-                            AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, toggleValue)
+                            if AXUIElementSetAttributeValue(window, kAXMinimizedAttribute as CFString, toggleValue) == .success {
+                                anyChanged = true
+                            }
                         }
-                        
+
                         if allMinimized {
-                            frontmostApp.activate(options: .activateIgnoringOtherApps)
+                            DispatchQueue.main.async {
+                                frontmostApp.activate(options: .activateIgnoringOtherApps)
+                            }
+                        } else if !anyChanged {
+                            // No window could be minimized (e.g. no minimize button): hide the app
+                            // so the click isn't swallowed with no effect.
+                            DispatchQueue.main.async {
+                                frontmostApp.hide()
+                            }
                         }
                     } else {
-                        frontmostApp.hide()
+                        DispatchQueue.main.async {
+                            frontmostApp.hide()
+                        }
                     }
                 }
                 

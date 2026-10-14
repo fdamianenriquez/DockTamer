@@ -27,7 +27,11 @@ class AppActivationMonitor {
             // Excluimos nuestra propia app o las del sistema background
             guard app.activationPolicy == .regular else { return }
             
-            self.unminimizeIfAllMinimized(app: app)
+            // Off the main thread: apps that are slow to answer AX (e.g. System Settings) would
+            // block the main run loop, which is also where the Dock event tap lives.
+            DispatchQueue.global(qos: .userInitiated).async {
+                self.unminimizeIfAllMinimized(app: app)
+            }
         }
     }
     
@@ -40,6 +44,7 @@ class AppActivationMonitor {
     
     private func unminimizeIfAllMinimized(app: NSRunningApplication) {
         let appElement = AXUIElementCreateApplication(app.processIdentifier)
+        AXUIElementSetMessagingTimeout(appElement, DockClickMonitor.axTimeout)
         var windowsRef: CFTypeRef?
         
         if AXUIElementCopyAttributeValue(appElement, kAXWindowsAttribute as CFString, &windowsRef) == .success,
