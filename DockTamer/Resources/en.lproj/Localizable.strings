@@ -1,0 +1,32 @@
+/* Menu item to turn the feature off */
+"Disable Click-to-Minimize" = "Disable Click-to-Minimize";
+
+/* Menu item to turn the feature on */
+"Enable Click-to-Minimize" = "Enable Click-to-Minimize";
+
+/* Menu item shown while checking permissions */
+"Permission status: Checking..." = "Permission status: Checking...";
+
+/* Menu item to quit the app */
+"Quit" = "Quit";
+
+/* Accessibility permission status */
+"✅ Granted" = "✅ Granted";
+
+/* Accessibility permission status */
+"❌ Denied" = "❌ Denied";
+
+/* Menu item showing permission status */
+"Accessibility Permissions: %@" = "Accessibility Permissions: %@";
+
+/* Permission alert title */
+"Permissions Required" = "Permissions Required";
+
+/* Permission alert body */
+"DockTamer needs Accessibility permissions to detect your clicks on the Dock and minimize windows.\n\nPlease enable them in System Settings." = "DockTamer needs Accessibility permissions to detect your clicks on the Dock and minimize windows.\n\nPlease enable them in System Settings.";
+
+/* Permission alert button */
+"Open Settings" = "Open Settings";
+
+/* Permission alert button */
+"Later" = "Later";
